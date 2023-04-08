@@ -9,11 +9,9 @@ export default defineConfig({
   })],
   build: {
     manifest: true,
-    rollupOptions: {
-      input: '/src/main.js'
-    }
   },
+  base: '/assets',
   server: {
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:9000',
   }
 })

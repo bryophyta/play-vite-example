@@ -9,6 +9,9 @@ export default defineConfig({
   })],
   build: {
     manifest: true,
+    outDir: '../public',
+    emptyOutDir: true,
+    assetsDir: '',
   },
   base: '/assets',
   server: {

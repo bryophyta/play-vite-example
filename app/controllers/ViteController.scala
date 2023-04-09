@@ -23,7 +23,7 @@ class ViteController (
 
   def index: Action[AnyContent] = asset("index.html")
 
-  def asset(resource: String): Action[AnyContent] = 
+  def asset(resource: String): Action[AnyContent] =
     if (mode == Mode.Dev) {
       Action.async { request =>
         val query = if (request.rawQueryString.length() > 0) "?" + request.rawQueryString else ""

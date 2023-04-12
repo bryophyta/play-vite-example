@@ -16,14 +16,20 @@ class ViteController (
   mode: Mode
 )(implicit executionContext: ExecutionContext) extends BaseController {
 
-  private def select(map: Map[String, scala.collection.Seq[String]], list: Seq[String]) = {
-    list.flatMap { key => map.get(key).map(key -> _.head) }
+  private def selectHeader(allReturnedHeaders: Map[String, scala.collection.Seq[String]], selectableHeader: Seq[String]) = {
+    selectableHeader.flatMap { key =>
+      for {
+        headerValues <- allReturnedHeaders.get(key)
+        firstHeaderValue <- headerValues.headOption
+      } yield (key, firstHeaderValue)
+    }
   }
+
   private val headersToKeep = Seq(CACHE_CONTROL, ETAG, DATE, ACCESS_CONTROL_ALLOW_ORIGIN)
 
   def index: Action[AnyContent] = asset("index.html")
 
-  def asset(resource: String): Action[AnyContent] =
+  def asset(resource: String): Action[AnyContent] = {
     if (mode == Mode.Dev) {
       Action.async { request =>
         val query = if (request.rawQueryString.length() > 0) "?" + request.rawQueryString else ""
@@ -33,7 +39,7 @@ class ViteController (
           .withFollowRedirects(false)
           .execute()
           .map(res => {
-            val headers = select(res.headers, headersToKeep)
+            val headers = selectHeader(res.headers, headersToKeep)
             val contentType = res.headers.get(CONTENT_TYPE).flatMap(_.headOption)
             Ok(res.body).as(contentType.getOrElse(TEXT)).withHeaders(headers:_*)
           })
@@ -41,5 +47,6 @@ class ViteController (
     } else {
       assets.at(resource)
     }
+  }
 
 }

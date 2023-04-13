@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc # v3.6.0
+        with:
+          java-version: 11
+          distribution: temurin
+          cache: sbt
+      - name: install client dependencies
+        working-directory: client
+        run: |
+          npm install
+      - name: build project
+        run: |
+          sbt dist
+      - name: lint
+        run: |
+          sbt scalafmtCheckAll scalafmtSbtCheck

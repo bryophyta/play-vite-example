@@ -15,29 +15,40 @@ object PlayVite extends sbt.AutoPlugin {
   override def requires = PlayScala && SbtWeb
   override def trigger = noTrigger
 
-  lazy val viteBuildAssets = taskKey[Seq[File]]("Build assets using `vite build`")
+  lazy val viteBuildAssets =
+    taskKey[Seq[File]]("Build assets using `vite build`")
 
   override def projectSettings = Seq(
     PlayKeys.playRunHooks += new ViteBuildHook(baseDirectory.value),
     Assets / classDirectory := webTarget.value,
     Assets / unmanagedResourceDirectories += (baseDirectory.value / "client" / "dist"),
     viteBuildAssets := {
-      val build = Process("npm run build -- --base /assets", baseDirectory.value / "client").!
+      val build = Process(
+        "npm run build -- --base /assets",
+        baseDirectory.value / "client"
+      ).!
 
-      if (build != 0) throw new RuntimeException("Assets compilation failed - see error messages above")
-      
+      if (build != 0)
+        throw new RuntimeException(
+          "Assets compilation failed - see error messages above"
+        )
+
       val buildOutputDir = baseDirectory.value / "client" / "dist"
       buildOutputDir.**("*").get
     },
-    Assets / packageBin := (Assets / packageBin).dependsOn(viteBuildAssets).value,
+    Assets / packageBin := (Assets / packageBin)
+      .dependsOn(viteBuildAssets)
+      .value
   )
 }
 
-class ViteBuildHook(base:File) extends PlayRunHook {
+class ViteBuildHook(base: File) extends PlayRunHook {
   var process: Option[Process] = None
 
   override def afterStarted(): Unit = {
-    process = Some(Process("npm run dev -- --base /assets", base / "client").run)
+    process = Some(
+      Process("npm run dev -- --base /assets", base / "client").run
+    )
   }
 
   override def afterStopped(): Unit = {

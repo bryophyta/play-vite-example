@@ -15,14 +15,16 @@ class ViteExampleApplicationLoader extends ApplicationLoader {
 }
 
 class ViteExampleComponents(context: Context)
-  extends BuiltInComponentsFromContext(context)
-  with AssetsComponents
-  with HttpFiltersComponents
-  with AhcWSComponents
-{
+    extends BuiltInComponentsFromContext(context)
+    with AssetsComponents
+    with HttpFiltersComponents
+    with AhcWSComponents {
   val mode: Mode = context.environment.mode
 
-  val viteController = new ViteController(controllerComponents, wsClient, assets, mode)(controllerComponents.executionContext)
+  val viteController =
+    new ViteController(controllerComponents, wsClient, assets, mode)(
+      controllerComponents.executionContext
+    )
 
   def router: Router = new Routes(
     httpErrorHandler,
